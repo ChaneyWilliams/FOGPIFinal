@@ -233,13 +233,13 @@ Entities:
         path: assets/defaults/models/cube.glb
         uuid: 17154083321347000101
   - Entity: 910100
-    Name: Pickup_00
-    Tag: Pickup
+    Name: Rock
+    Tag: ""
     Canis::Transform:
       active: true
       position: [-6, 0.8, -6]
       rotation: [0, 0, 0]
-      scale: [0.7, 0.7, 0.7]
+      scale: [1, 1, 1]
       parent: 0
       children:
         []
@@ -252,8 +252,8 @@ Entities:
       linearDamping: 0.05
       angularDamping: 0.05
       useGravity: false
-      isSensor: true
-      layer: 4
+      isSensor: false
+      layer: 5
       mask: 4294967295
       allowSleeping: false
       lockRotationX: false
@@ -265,24 +265,24 @@ Entities:
       active: true
       size: [1, 1, 1]
     Canis::Material:
-      color: [1, 0.87, 0.22, 1]
+      color: [0.18627453, 0.18262209, 0.16435988, 1]
       MaterialAsset:
         uuid: 17490362529814420531
     Canis::Model:
-      color: [1, 0.87, 0.22, 1]
+      color: [0.51960784, 0.50729686, 0.44574204, 1]
       ModelAsset:
         path: assets/defaults/models/cube.glb
         uuid: 17154083321347000101
-    RollABall::PickupSpinner:
-      spinSpeedDegrees: 120
+    Block:
+      blockType: 0
   - Entity: 910101
-    Name: Pickup_01
-    Tag: Pickup
+    Name: Gold
+    Tag: ""
     Canis::Transform:
       active: true
       position: [0, 0.8, -6]
       rotation: [0, 0, 0]
-      scale: [0.7, 0.7, 0.7]
+      scale: [1, 1, 1]
       parent: 0
       children:
         []
@@ -295,8 +295,8 @@ Entities:
       linearDamping: 0.05
       angularDamping: 0.05
       useGravity: false
-      isSensor: true
-      layer: 4
+      isSensor: false
+      layer: 5
       mask: 4294967295
       allowSleeping: false
       lockRotationX: false
@@ -316,16 +316,16 @@ Entities:
       ModelAsset:
         path: assets/defaults/models/cube.glb
         uuid: 17154083321347000101
-    RollABall::PickupSpinner:
-      spinSpeedDegrees: 120
+    Block:
+      blockType: 1
   - Entity: 910102
-    Name: Pickup_02
-    Tag: Pickup
+    Name: Uranium
+    Tag: ""
     Canis::Transform:
       active: true
       position: [6, 0.8, -6]
       rotation: [0, 0, 0]
-      scale: [0.7, 0.7, 0.7]
+      scale: [1, 1, 1]
       parent: 0
       children:
         []
@@ -338,8 +338,8 @@ Entities:
       linearDamping: 0.05
       angularDamping: 0.05
       useGravity: false
-      isSensor: true
-      layer: 4
+      isSensor: false
+      layer: 5
       mask: 4294967295
       allowSleeping: false
       lockRotationX: false
@@ -351,7 +351,7 @@ Entities:
       active: true
       size: [1, 1, 1]
     Canis::Material:
-      color: [1, 0.87, 0.22, 1]
+      color: [0.058823466, 1, 0, 1]
       MaterialAsset:
         uuid: 17490362529814420531
     Canis::Model:
@@ -359,223 +359,8 @@ Entities:
       ModelAsset:
         path: assets/defaults/models/cube.glb
         uuid: 17154083321347000101
-    RollABall::PickupSpinner:
-      spinSpeedDegrees: 120
-  - Entity: 910103
-    Name: Pickup_03
-    Tag: Pickup
-    Canis::Transform:
-      active: true
-      position: [-6, 0.8, 0]
-      rotation: [0, 0, 0]
-      scale: [0.7, 0.7, 0.7]
-      parent: 0
-      children:
-        []
-    Canis::Rigidbody:
-      active: true
-      motionType: 0
-      mass: 1
-      friction: 0.2
-      restitution: 0
-      linearDamping: 0.05
-      angularDamping: 0.05
-      useGravity: false
-      isSensor: true
-      layer: 4
-      mask: 4294967295
-      allowSleeping: false
-      lockRotationX: false
-      lockRotationY: false
-      lockRotationZ: false
-      linearVelocity: [0, 0, 0]
-      angularVelocity: [0, 0, 0]
-    Canis::BoxCollider:
-      active: true
-      size: [1, 1, 1]
-    Canis::Material:
-      color: [1, 0.87, 0.22, 1]
-      MaterialAsset:
-        uuid: 17490362529814420531
-    Canis::Model:
-      color: [1, 0.87, 0.22, 1]
-      ModelAsset:
-        path: assets/defaults/models/cube.glb
-        uuid: 17154083321347000101
-    RollABall::PickupSpinner:
-      spinSpeedDegrees: 120
-  - Entity: 910104
-    Name: Pickup_04
-    Tag: Pickup
-    Canis::Transform:
-      active: true
-      position: [6, 0.8, 0]
-      rotation: [0, 0, 0]
-      scale: [0.7, 0.7, 0.7]
-      parent: 0
-      children:
-        []
-    Canis::Rigidbody:
-      active: true
-      motionType: 0
-      mass: 1
-      friction: 0.2
-      restitution: 0
-      linearDamping: 0.05
-      angularDamping: 0.05
-      useGravity: false
-      isSensor: true
-      layer: 4
-      mask: 4294967295
-      allowSleeping: false
-      lockRotationX: false
-      lockRotationY: false
-      lockRotationZ: false
-      linearVelocity: [0, 0, 0]
-      angularVelocity: [0, 0, 0]
-    Canis::BoxCollider:
-      active: true
-      size: [1, 1, 1]
-    Canis::Material:
-      color: [1, 0.87, 0.22, 1]
-      MaterialAsset:
-        uuid: 17490362529814420531
-    Canis::Model:
-      color: [1, 0.87, 0.22, 1]
-      ModelAsset:
-        path: assets/defaults/models/cube.glb
-        uuid: 17154083321347000101
-    RollABall::PickupSpinner:
-      spinSpeedDegrees: 120
-  - Entity: 910105
-    Name: Pickup_05
-    Tag: Pickup
-    Canis::Transform:
-      active: true
-      position: [-6, 0.8, 6]
-      rotation: [0, 0, 0]
-      scale: [0.7, 0.7, 0.7]
-      parent: 0
-      children:
-        []
-    Canis::Rigidbody:
-      active: true
-      motionType: 0
-      mass: 1
-      friction: 0.2
-      restitution: 0
-      linearDamping: 0.05
-      angularDamping: 0.05
-      useGravity: false
-      isSensor: true
-      layer: 4
-      mask: 4294967295
-      allowSleeping: false
-      lockRotationX: false
-      lockRotationY: false
-      lockRotationZ: false
-      linearVelocity: [0, 0, 0]
-      angularVelocity: [0, 0, 0]
-    Canis::BoxCollider:
-      active: true
-      size: [1, 1, 1]
-    Canis::Material:
-      color: [1, 0.87, 0.22, 1]
-      MaterialAsset:
-        uuid: 17490362529814420531
-    Canis::Model:
-      color: [1, 0.87, 0.22, 1]
-      ModelAsset:
-        path: assets/defaults/models/cube.glb
-        uuid: 17154083321347000101
-    RollABall::PickupSpinner:
-      spinSpeedDegrees: 120
-  - Entity: 910106
-    Name: Pickup_06
-    Tag: Pickup
-    Canis::Transform:
-      active: true
-      position: [0, 0.8, 6]
-      rotation: [0, 0, 0]
-      scale: [0.7, 0.7, 0.7]
-      parent: 0
-      children:
-        []
-    Canis::Rigidbody:
-      active: true
-      motionType: 0
-      mass: 1
-      friction: 0.2
-      restitution: 0
-      linearDamping: 0.05
-      angularDamping: 0.05
-      useGravity: false
-      isSensor: true
-      layer: 4
-      mask: 4294967295
-      allowSleeping: false
-      lockRotationX: false
-      lockRotationY: false
-      lockRotationZ: false
-      linearVelocity: [0, 0, 0]
-      angularVelocity: [0, 0, 0]
-    Canis::BoxCollider:
-      active: true
-      size: [1, 1, 1]
-    Canis::Material:
-      color: [1, 0.87, 0.22, 1]
-      MaterialAsset:
-        uuid: 17490362529814420531
-    Canis::Model:
-      color: [1, 0.87, 0.22, 1]
-      ModelAsset:
-        path: assets/defaults/models/cube.glb
-        uuid: 17154083321347000101
-    RollABall::PickupSpinner:
-      spinSpeedDegrees: 120
-  - Entity: 910107
-    Name: Pickup_07
-    Tag: Pickup
-    Canis::Transform:
-      active: true
-      position: [6, 0.8, 6]
-      rotation: [0, 0, 0]
-      scale: [0.7, 0.7, 0.7]
-      parent: 0
-      children:
-        []
-    Canis::Rigidbody:
-      active: true
-      motionType: 0
-      mass: 1
-      friction: 0.2
-      restitution: 0
-      linearDamping: 0.05
-      angularDamping: 0.05
-      useGravity: false
-      isSensor: true
-      layer: 4
-      mask: 4294967295
-      allowSleeping: false
-      lockRotationX: false
-      lockRotationY: false
-      lockRotationZ: false
-      linearVelocity: [0, 0, 0]
-      angularVelocity: [0, 0, 0]
-    Canis::BoxCollider:
-      active: true
-      size: [1, 1, 1]
-    Canis::Material:
-      color: [1, 0.87, 0.22, 1]
-      MaterialAsset:
-        uuid: 17490362529814420531
-    Canis::Model:
-      color: [1, 0.87, 0.22, 1]
-      ModelAsset:
-        path: assets/defaults/models/cube.glb
-        uuid: 17154083321347000101
-    RollABall::PickupSpinner:
-      spinSpeedDegrees: 120
+    Block:
+      blockType: 2
   - Entity: 7448487586354055887
     Name: BoostPad
     Tag: ""
@@ -698,6 +483,7 @@ Entities:
       jumpImpulse: 7.5
       groundCheckDistance: 2
       groundCollisionMask: 1
+      scannerCollisionMask: 4
       pickupRadius: 1.15
   - Entity: 4317909316194178768
     Name: Info_Text
@@ -721,3 +507,6 @@ Entities:
       FontAsset:
         uuid: 14618725492368012463
         fontSize: 32
+    InfoText:
+      timer: 0
+      fadeoutTime: 2

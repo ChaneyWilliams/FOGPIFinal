@@ -1,5 +1,8 @@
 #include <Player/PlayerController.hpp>
 
+#include <Environment/Block.hpp>
+#include <UI/InfoText.hpp>
+
 #include <Canis/App.hpp>
 #include <Canis/Debug.hpp>
 #include <Canis/InputManager.hpp>
@@ -17,6 +20,7 @@ void RegisterPlayerControllerScript(App& _app)
     REGISTER_PROPERTY(playerConf, PlayerController, jumpImpulse);
     REGISTER_PROPERTY(playerConf, PlayerController, groundCheckDistance);
     REGISTER_PROPERTY(playerConf, PlayerController, groundCollisionMask);
+    REGISTER_PROPERTY(playerConf, PlayerController, scannerCollisionMask);
     REGISTER_PROPERTY(playerConf, PlayerController, pickupRadius);
     
     DEFAULT_CONFIG_AND_REQUIRED(playerConf, PlayerController, Transform, Rigidbody, CapsuleCollider);
@@ -119,7 +123,7 @@ void PlayerController::Update(float _dt)
     Vector3 desiredVelocity = Vector3(0.0f);
     if (inputDirection != Vector3(0.0f))
     {
-        Vector3 movement = (forward * inputDirection.z) + (right * inputDirection.x);
+        Vector3 movement = (forward * -inputDirection.z) + (right * inputDirection.x);
         movement = glm::normalize(movement);
         float speed = sprint ? sprintingSpeed : walkingSpeed;
         desiredVelocity = movement * speed;
@@ -128,4 +132,38 @@ void PlayerController::Update(float _dt)
     Vector3 horizontalVelocity = Vector3(rigidbody.linearVelocity.x, 0.0f, rigidbody.linearVelocity.z);
     Vector3 horizontalVelocityChange = desiredVelocity - horizontalVelocity;
     rigidbody.AddForce(Vector3(horizontalVelocityChange.x, 0.0f, horizontalVelocityChange.z), Rigidbody3DForceMode::VELOCITY_CHANGE);
+
+    // scanner
+    if (m_cameraEntity && m_cameraEntity->HasComponent<Transform>())
+    {
+        RaycastHit scannerHit = {};
+        Vector3 cameraRayOrigin = m_cameraEntity->GetComponent<Transform>().GetGlobalPosition();
+        if (entity.scene.Raycast(
+            cameraRayOrigin,
+            m_cameraEntity->GetComponent<Transform>().GetForward(),
+            scannerHit,
+            100.0f,
+            scannerCollisionMask))
+        {
+            if (Block* block = scannerHit.entity->GetScript<Block>()) {
+                std::string blockName = "";
+
+                switch(block->blockType) {
+                    case 0:
+                        blockName = "Rock";
+                        break;
+                    case 1:
+                        blockName = "Gold";
+                        break;
+                    case 2:
+                        blockName = "Uranium";
+                        break;
+                }
+
+                if (Entity* info = entity.scene.GetEntityWithTag("INFO_TEXT"))
+                    if (InfoText* infoText = info->GetScript<InfoText>())
+                        infoText->SetText(blockName);
+            }
+        }
+    }
 }

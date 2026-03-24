@@ -18,6 +18,7 @@ public:
     float jumpImpulse = 7.5f;
     float groundCheckDistance = 0.75f;
     Canis::Mask groundCollisionMask = Canis::Rigidbody::DefaultLayer;
+    Canis::Mask scannerCollisionMask = Canis::Rigidbody::DefaultLayer;
     float pickupRadius = 1.15f;
 
     bool grounded = false;

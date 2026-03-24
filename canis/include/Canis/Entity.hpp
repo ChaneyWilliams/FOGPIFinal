@@ -686,7 +686,7 @@ namespace Canis
         Vector3 GetForward() const
         {
             const Matrix4 matrix = GetModelMatrix();
-            Vector4 forward4 = matrix * Vector4(0.0f, 0.0f, 1.0f, 0.0f);
+            Vector4 forward4 = matrix * Vector4(0.0f, 0.0f, -1.0f, 0.0f);
             return glm::normalize(Vector3(forward4.x, forward4.y, forward4.z));
         }
 
