@@ -46,19 +46,31 @@
   "buildPresets": [
     {
       "name": "debug",
-      "configurePreset": "debug"
+      "configurePreset": "debug",
+      "targets": [
+        "all"
+      ]
     },
     {
       "name": "release",
-      "configurePreset": "release"
+      "configurePreset": "release",
+      "targets": [
+        "all"
+      ]
     },
     {
       "name": "web-debug",
-      "configurePreset": "web-debug"
+      "configurePreset": "web-debug",
+      "targets": [
+        "all"
+      ]
     },
     {
       "name": "web-release",
-      "configurePreset": "web-release"
+      "configurePreset": "web-release",
+      "targets": [
+        "all"
+      ]
     }
   ]
 }
