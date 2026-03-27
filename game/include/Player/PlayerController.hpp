@@ -20,7 +20,6 @@ public:
     Canis::Mask groundCollisionMask = Canis::Rigidbody::DefaultLayer;
     Canis::Mask blockScannerMask = Canis::Rigidbody::DefaultLayer;
     Canis::Mask itemScannerMask = Canis::Rigidbody::DefaultLayer;
-    float pickupRadius = 1.15f;
 
     bool grounded = false;
 

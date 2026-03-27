@@ -14,7 +14,7 @@ Entities:
         []
     Canis::Rigidbody:
       active: true
-      motionType: 0
+      motionType: 1
       mass: 1
       friction: 0.2
       restitution: 0

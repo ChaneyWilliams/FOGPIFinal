@@ -2,7 +2,6 @@
 
 #include <Environment/I_Block.hpp>
 #include <I_Interactable.hpp>
-#include <SuperPupUtilities/I_Item.hpp>
 #include <UI/InfoText.hpp>
 
 #include <Canis/App.hpp>
@@ -24,7 +23,6 @@ void RegisterPlayerControllerScript(App& _app)
     REGISTER_PROPERTY(playerConf, PlayerController, groundCollisionMask);
     REGISTER_PROPERTY(playerConf, PlayerController, blockScannerMask);
     REGISTER_PROPERTY(playerConf, PlayerController, itemScannerMask);
-    REGISTER_PROPERTY(playerConf, PlayerController, pickupRadius);
     
     DEFAULT_CONFIG_AND_REQUIRED(playerConf, PlayerController, Transform, Rigidbody, CapsuleCollider);
 
