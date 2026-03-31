@@ -9,6 +9,7 @@
     {
       "name": "debug",
       "displayName": "Debug",
+      "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
@@ -17,6 +18,7 @@
     {
       "name": "release",
       "displayName": "Release",
+      "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
@@ -25,6 +27,7 @@
     {
       "name": "web-debug",
       "displayName": "Web Debug",
+      "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-web-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
@@ -35,6 +38,7 @@
     {
       "name": "web-release",
       "displayName": "Web Release",
+      "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-web-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
