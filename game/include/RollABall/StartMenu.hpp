@@ -16,6 +16,7 @@ namespace RollABall
         static constexpr const char* ScriptName = "RollABall::StartMenu";
 
         Canis::SceneAssetHandle gameScene;
+        Canis::SceneAssetHandle ecsSampleScene;
 
         explicit StartMenu(Canis::Entity& _entity) : Canis::ScriptableEntity(_entity) {}
 
@@ -25,6 +26,7 @@ namespace RollABall
         void Update(float _dt) override;
 
         void Play(const Canis::UIActionContext& _context);
+        void PlayECSExample(const Canis::UIActionContext& _context);
         void Quit(const Canis::UIActionContext& _context);
     };
 
