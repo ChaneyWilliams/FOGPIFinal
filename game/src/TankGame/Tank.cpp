@@ -23,20 +23,11 @@ namespace TankGame
     {
         REGISTER_PROPERTY(tankConf, TankGame::Tank, speed);
         REGISTER_PROPERTY(tankConf, TankGame::Tank, turnSpeed);
-        REGISTER_PROPERTY(tankConf, TankGame::Tank, count);
+        REGISTER_PROPERTY(tankConf, TankGame::Tank, coolDownTime);
 
         DEFAULT_CONFIG_AND_REQUIRED(tankConf, TankGame::Tank, Canis::RectTransform, Canis::Sprite2D);
 
-        tankConf.DrawInspector = [](Editor &_editor, Entity &_entity, const ScriptConf &_conf) -> void
-        {
-            if (_entity.HasScript<TankGame::Tank>())
-            {
-                TankGame::Tank& tank = *_entity.GetScript<TankGame::Tank>();
-                ImGui::InputFloat(("speed##" + _conf.name).c_str(), &tank.speed);
-                ImGui::InputFloat(("turnSpeed##" + _conf.name).c_str(), &tank.turnSpeed);
-                ImGui::InputInt(("count##" + _conf.name).c_str(), &tank.count);
-            }
-        };
+        tankConf.DEFAULT_DRAW_INSPECTOR(TankGame::Tank);
 
         _app.RegisterScript(tankConf);
     }
@@ -137,9 +128,16 @@ namespace TankGame
     void Tank::UpdateGun(float _dt) {
         if (m_firePoint == nullptr)
             return;
+        
+        m_time -= _dt;
+
+        if (m_time > 0.0f)
+            return;
 
         if (entity.scene.GetInputManager().GetLeftClick())
         {
+            m_time = coolDownTime;
+            
             Canis::Entity* bulletEntity = entity.scene.CreateEntity("Bullet");
             RectTransform& bulletTransform = *bulletEntity->AddComponent<RectTransform>();
             Sprite2D& bulletSprite = *bulletEntity->AddComponent<Sprite2D>();

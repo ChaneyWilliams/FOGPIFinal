@@ -11,6 +11,8 @@ namespace TankGame
         Canis::RectTransform* m_turret = nullptr;
         Canis::RectTransform* m_firePoint = nullptr;
 
+        float m_time = 0.0f;
+
         void Movement(float _dt);
         void Turret(float _dt);
         void UpdateGun(float _dt);
@@ -19,7 +21,7 @@ namespace TankGame
 
         float speed = 10.0f;
         float turnSpeed = 25.0f;
-        int count = 5;
+        float coolDownTime = 0.5f;
 
         Tank(Canis::Entity &_entity) : Canis::ScriptableEntity(_entity) {}
 
