@@ -2,11 +2,11 @@
 
 #include <Canis/Entity.hpp>
 
+#include <AICombat/BrawlerStateMachine.hpp>
 #include <vector>
 
 namespace AICombat
 {
-    class BrawlerStateMachine;
 
     class HammerDamage : public Canis::ScriptableEntity
     {

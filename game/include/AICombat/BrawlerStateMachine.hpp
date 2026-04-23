@@ -3,6 +3,7 @@
 #include <Canis/Entity.hpp>
 
 #include <SuperPupUtilities/StateMachine.hpp>
+#include <AICombat/ICombatant.hpp>
 
 #include <string>
 
@@ -10,44 +11,44 @@ namespace AICombat
 {
     class BrawlerStateMachine;
 
-    class IdleState : public SuperPupUtilities::State
+    class BrawlerIdleState : public SuperPupUtilities::State
     {
     public:
-        static constexpr const char* Name = "IdleState";
+        static constexpr const char* Name = "BrawlerIdleState";
 
-        explicit IdleState(SuperPupUtilities::StateMachine& _stateMachine);
+        explicit BrawlerIdleState(SuperPupUtilities::StateMachine& _stateMachine);
         void Enter() override;
         void Update(float _dt) override;
     };
 
-    class ChaseState : public SuperPupUtilities::State
+    class BrawlerChaseState : public SuperPupUtilities::State
     {
     public:
-        static constexpr const char* Name = "ChaseState";
+        static constexpr const char* Name = "BrawlerChaseState";
         float moveSpeed = 4.0f;
 
-        explicit ChaseState(SuperPupUtilities::StateMachine& _stateMachine);
+        explicit BrawlerChaseState(SuperPupUtilities::StateMachine& _stateMachine);
         void Enter() override;
         void Update(float _dt) override;
     };
 
-    class HammerTimeState : public SuperPupUtilities::State
+    class BrawlerHammerTimeState : public SuperPupUtilities::State
     {
     public:
-        static constexpr const char* Name = "HammerTimeState";
+        static constexpr const char* Name = "BrawlerHammerTimeState";
         float hammerRestDegrees = 140.0f;
         float hammerSwingDegrees = -120.0f;
         float attackRange = 2.25f;
         float attackDuration = 0.75f;
         float attackDamageTime = 0.25f;
 
-        explicit HammerTimeState(SuperPupUtilities::StateMachine& _stateMachine);
+        explicit BrawlerHammerTimeState(SuperPupUtilities::StateMachine& _stateMachine);
         void Enter() override;
         void Update(float _dt) override;
         void Exit() override;
     };
 
-    class BrawlerStateMachine : public SuperPupUtilities::StateMachine
+    class BrawlerStateMachine : public SuperPupUtilities::StateMachine, public ICombatant
     {
     public:
         static constexpr const char* ScriptName = "AICombat::BrawlerStateMachine";
@@ -65,9 +66,9 @@ namespace AICombat
 
         explicit BrawlerStateMachine(Canis::Entity& _entity);
 
-        IdleState idleState;
-        ChaseState chaseState;
-        HammerTimeState hammerTimeState;
+        BrawlerIdleState idleState;
+        BrawlerChaseState chaseState;
+        BrawlerHammerTimeState hammerTimeState;
 
         void Create() override;
         void Ready() override;
@@ -79,7 +80,7 @@ namespace AICombat
         void FaceTarget(const Canis::Entity& _target);
         void MoveTowards(const Canis::Entity& _target, float _speed, float _dt);
         void ChangeState(const std::string& _stateName);
-        const std::string& GetCurrentStateName() const;
+        const std::string& GetCurrentStateName() const override;
         float GetStateTime() const;
         float GetAttackRange() const;
         int GetCurrentHealth() const;

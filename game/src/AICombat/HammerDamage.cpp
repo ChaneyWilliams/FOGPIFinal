@@ -1,7 +1,5 @@
 #include <AICombat/HammerDamage.hpp>
 
-#include <AICombat/BrawlerStateMachine.hpp>
-
 #include <Canis/App.hpp>
 #include <Canis/ConfigHelper.hpp>
 
@@ -80,7 +78,7 @@ namespace AICombat
         }
 
         const bool damageWindowOpen =
-            ownerStateMachine->GetCurrentStateName() == HammerTimeState::Name &&
+            ownerStateMachine->GetCurrentStateName() == BrawlerHammerTimeState::Name &&
             ownerStateMachine->GetStateTime() >= ownerStateMachine->hammerTimeState.attackDamageTime;
 
         if (!damageWindowOpen)
@@ -94,7 +92,7 @@ namespace AICombat
             if (other == nullptr || !other->active || other == owner || HasDamagedThisSwing(*other))
                 continue;
 
-            BrawlerStateMachine* targetStateMachine = other->GetScript<BrawlerStateMachine>();
+            AICombat::ICombatant* targetStateMachine = other->GetScript<AICombat::ICombatant>();
             if (targetStateMachine == nullptr || !targetStateMachine->IsAlive())
                 continue;
 
@@ -125,7 +123,7 @@ namespace AICombat
         Canis::Entity* current = entity.GetComponent<Canis::Transform>().parent;
         while (current != nullptr)
         {
-            if (current->HasScript<BrawlerStateMachine>())
+            if (current->HasScript<AICombat::ICombatant>())
                 return current;
 
             if (!current->HasComponent<Canis::Transform>())

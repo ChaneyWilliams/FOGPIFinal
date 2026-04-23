@@ -16,34 +16,34 @@ namespace AICombat
         ScriptConf brawlerStateMachineConf = {};
     }
 
-    IdleState::IdleState(SuperPupUtilities::StateMachine& _stateMachine) :
+    BrawlerIdleState::BrawlerIdleState(SuperPupUtilities::StateMachine& _stateMachine) :
         State(Name, _stateMachine) {}
 
-    void IdleState::Enter()
+    void BrawlerIdleState::Enter()
     {
         if (BrawlerStateMachine* brawlerStatMachine = dynamic_cast<BrawlerStateMachine*>(m_stateMachine))
             brawlerStatMachine->ResetHammerPose();
     }
 
-    void IdleState::Update(float)
+    void BrawlerIdleState::Update(float)
     {
         if (BrawlerStateMachine* brawlerStatMachine = dynamic_cast<BrawlerStateMachine*>(m_stateMachine))
         {
             if (brawlerStatMachine->FindClosestTarget() != nullptr)
-                brawlerStatMachine->ChangeState(ChaseState::Name);
+                brawlerStatMachine->ChangeState(BrawlerChaseState::Name);
         }
     }
 
-    ChaseState::ChaseState(SuperPupUtilities::StateMachine& _stateMachine) :
+    BrawlerChaseState::BrawlerChaseState(SuperPupUtilities::StateMachine& _stateMachine) :
         State(Name, _stateMachine) {}
 
-    void ChaseState::Enter()
+    void BrawlerChaseState::Enter()
     {
         if (BrawlerStateMachine* brawlerStatMachine = dynamic_cast<BrawlerStateMachine*>(m_stateMachine))
             brawlerStatMachine->ResetHammerPose();
     }
 
-    void ChaseState::Update(float _dt)
+    void BrawlerChaseState::Update(float _dt)
     {
         BrawlerStateMachine* brawlerStatMachine = dynamic_cast<BrawlerStateMachine*>(m_stateMachine);
         if (brawlerStatMachine == nullptr)
@@ -53,7 +53,7 @@ namespace AICombat
 
         if (target == nullptr)
         {
-            brawlerStatMachine->ChangeState(IdleState::Name);
+            brawlerStatMachine->ChangeState(BrawlerIdleState::Name);
             return;
         }
 
@@ -61,23 +61,23 @@ namespace AICombat
 
         if (brawlerStatMachine->DistanceTo(*target) <= brawlerStatMachine->GetAttackRange())
         {
-            brawlerStatMachine->ChangeState(HammerTimeState::Name);
+            brawlerStatMachine->ChangeState(BrawlerHammerTimeState::Name);
             return;
         }
 
         brawlerStatMachine->MoveTowards(*target, moveSpeed, _dt);
     }
 
-    HammerTimeState::HammerTimeState(SuperPupUtilities::StateMachine& _stateMachine) :
+    BrawlerHammerTimeState::BrawlerHammerTimeState(SuperPupUtilities::StateMachine& _stateMachine) :
         State(Name, _stateMachine) {}
 
-    void HammerTimeState::Enter()
+    void BrawlerHammerTimeState::Enter()
     {
         if (BrawlerStateMachine* brawlerStatMachine = dynamic_cast<BrawlerStateMachine*>(m_stateMachine))
             brawlerStatMachine->SetHammerSwing(0.0f);
     }
 
-    void HammerTimeState::Update(float)
+    void BrawlerHammerTimeState::Update(float)
     {
         BrawlerStateMachine* brawlerStatMachine = dynamic_cast<BrawlerStateMachine*>(m_stateMachine);
         if (brawlerStatMachine == nullptr)
@@ -93,12 +93,12 @@ namespace AICombat
             return;
 
         if (brawlerStatMachine->FindClosestTarget() != nullptr)
-            brawlerStatMachine->ChangeState(ChaseState::Name);
+            brawlerStatMachine->ChangeState(BrawlerChaseState::Name);
         else
-            brawlerStatMachine->ChangeState(IdleState::Name);
+            brawlerStatMachine->ChangeState(BrawlerIdleState::Name);
     }
 
-    void HammerTimeState::Exit()
+    void BrawlerHammerTimeState::Exit()
     {
         if (BrawlerStateMachine* brawlerStatMachine = dynamic_cast<BrawlerStateMachine*>(m_stateMachine))
             brawlerStatMachine->ResetHammerPose();
@@ -183,7 +183,7 @@ namespace AICombat
         AddState(hammerTimeState);
 
         ResetHammerPose();
-        ChangeState(IdleState::Name);
+        ChangeState(BrawlerIdleState::Name);
     }
 
     void BrawlerStateMachine::Destroy()
