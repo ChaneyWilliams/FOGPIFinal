@@ -4,6 +4,8 @@
 #include <Canis/AudioManager.hpp>
 #include <Canis/ConfigHelper.hpp>
 #include <Canis/Debug.hpp>
+#include <SuperPupUtilities/Bullet.hpp>
+#include <SuperPupUtilities/SimpleObjectPool.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -16,102 +18,169 @@ namespace AICombat
         ScriptConf mageStateMachineConf = {};
     }
 
-    MageIdleState::MageIdleState(SuperPupUtilities::StateMachine& _stateMachine) :
-        State(Name, _stateMachine) {}
+    MageIdleState::MageIdleState(SuperPupUtilities::StateMachine &_stateMachine) : State(Name, _stateMachine) {}
 
     void MageIdleState::Enter()
     {
-        if (MageStateMachine* mageStatMachine = dynamic_cast<MageStateMachine*>(m_stateMachine))
-            mageStatMachine->ResetStaffPose();
+        if (MageStateMachine *mageStateMachine = dynamic_cast<MageStateMachine *>(m_stateMachine))
+            mageStateMachine->ResetStaffPose();
     }
 
     void MageIdleState::Update(float)
     {
-        if (MageStateMachine* mageStatMachine = dynamic_cast<MageStateMachine*>(m_stateMachine))
+        if (MageStateMachine *mageStateMachine = dynamic_cast<MageStateMachine *>(m_stateMachine))
         {
-            if (mageStatMachine->FindClosestTarget() != nullptr)
-                mageStatMachine->ChangeState(MageChaseState::Name);
+            if (mageStateMachine->FindClosestTarget() != nullptr)
+                mageStateMachine->ChangeState(MageChaseState::Name);
         }
     }
 
-    MageChaseState::MageChaseState(SuperPupUtilities::StateMachine& _stateMachine) :
-        State(Name, _stateMachine) {}
+    MageChaseState::MageChaseState(SuperPupUtilities::StateMachine &_stateMachine) : State(Name, _stateMachine) {}
 
     void MageChaseState::Enter()
     {
-        if (MageStateMachine* mageStatMachine = dynamic_cast<MageStateMachine*>(m_stateMachine))
-            mageStatMachine->ResetStaffPose();
+        if (MageStateMachine *mageStateMachine = dynamic_cast<MageStateMachine *>(m_stateMachine))
+            mageStateMachine->ResetStaffPose();
     }
 
     void MageChaseState::Update(float _dt)
     {
-        MageStateMachine* mageStatMachine = dynamic_cast<MageStateMachine*>(m_stateMachine);
-        if (mageStatMachine == nullptr)
+        MageStateMachine *mageStateMachine = dynamic_cast<MageStateMachine *>(m_stateMachine);
+        if (mageStateMachine == nullptr)
             return;
 
-        Canis::Entity* target = mageStatMachine->FindClosestTarget();
+        Canis::Entity *target = mageStateMachine->FindClosestTarget();
 
         if (target == nullptr)
         {
-            mageStatMachine->ChangeState(MageIdleState::Name);
+            mageStateMachine->ChangeState(MageIdleState::Name);
             return;
         }
 
-        mageStatMachine->FaceTarget(*target);
+        mageStateMachine->FaceTarget(*target);
 
-        if (mageStatMachine->DistanceTo(*target) <= mageStatMachine->GetAttackRange())
+        if (mageStateMachine->DistanceTo(*target) <= mageStateMachine->GetAttackRange())
         {
-            mageStatMachine->ChangeState(MageZapTimeState::Name);
+            mageStateMachine->ChangeState(MageZapTimeState::Name);
             return;
         }
 
-        mageStatMachine->MoveTowards(*target, moveSpeed, _dt);
+        mageStateMachine->MoveTowards(*target, moveSpeed, _dt);
     }
 
-    MageZapTimeState::MageZapTimeState(SuperPupUtilities::StateMachine& _stateMachine) :
-        State(Name, _stateMachine) {}
+    MageZapTimeState::MageZapTimeState(SuperPupUtilities::StateMachine &_stateMachine) : State(Name, _stateMachine) {}
 
     void MageZapTimeState::Enter()
     {
-        if (MageStateMachine* mageStatMachine = dynamic_cast<MageStateMachine*>(m_stateMachine))
-            mageStatMachine->SetStaffSwing(0.0f);
+        if (MageStateMachine *mageStateMachine = dynamic_cast<MageStateMachine *>(m_stateMachine))
+            mageStateMachine->SetStaffSwing(0.0f);
     }
 
-    void MageZapTimeState::Update(float)
+    void MageZapTimeState::Update(float _dt)
     {
-        MageStateMachine* mageStatMachine = dynamic_cast<MageStateMachine*>(m_stateMachine);
-        if (mageStatMachine == nullptr)
+        MageStateMachine *mageStateMachine = dynamic_cast<MageStateMachine *>(m_stateMachine);
+
+        if (mageStateMachine == nullptr)
             return;
 
-        if (Canis::Entity* target = mageStatMachine->FindClosestTarget())
-            mageStatMachine->FaceTarget(*target);
+        Canis::Entity *target = mageStateMachine->FindClosestTarget();
+
+        if (target)
+            mageStateMachine->FaceTarget(*target);
+
+        
+        Canis::Transform& transform = mageStateMachine->staffVisual->GetComponent<Canis::Transform>();
+        const Canis::Vector3 targetPosition = target->GetComponent<Canis::Transform>().GetGlobalPosition();
+        Canis::Vector3 toTarget = targetPosition - transform.GetGlobalPosition();
+        toTarget.y = 0.0f;
+
+        if(m_fireCooldown > 0.0f)
+            return;
 
         const float duration = std::max(attackDuration, 0.001f);
-        mageStatMachine->SetStaffSwing(mageStatMachine->GetStateTime() / duration);
+        mageStateMachine->SetStaffSwing(mageStateMachine->GetStateTime() / duration);
 
-
-        if (mageStatMachine->GetStateTime() < duration)
+         if (glm::length(toTarget) <= 0.001f)
             return;
 
-        if (mageStatMachine->FindClosestTarget() != nullptr)
-            mageStatMachine->ChangeState(MageChaseState::Name);
+        const float angleError = RotateTowards(transform, toTarget, _dt);
+        if (m_fireCooldown > 0.0f)
+            m_fireCooldown -= _dt;
+
+        if (m_fireCooldown > 0.0f)
+            return;
+
+        const float fireAngleThreshold = fireAngleThresholdDegrees * Canis::DEG2RAD;
+        if (std::abs(angleError) > fireAngleThreshold)
+            return;
+
+        Fire(GetMuzzlePosition(transform), toTarget);
+        m_fireCooldown = fireInterval;
+
+        if (mageStateMachine->GetStateTime() < duration)
+            return;
+
+        if (mageStateMachine->FindClosestTarget() != nullptr)
+            mageStateMachine->ChangeState(MageChaseState::Name);
         else
-            mageStatMachine->ChangeState(MageIdleState::Name);
+            mageStateMachine->ChangeState(MageIdleState::Name);
+    }
+
+    float MageZapTimeState::RotateTowards(Canis::Transform& _transform, const Canis::Vector3& _direction, float _dt) const
+    {
+        const Canis::Vector3 flatDirection = glm::normalize(Canis::Vector3(_direction.x, 0.0f, _direction.z));
+        const float targetYaw = std::atan2(-flatDirection.x, -flatDirection.z);
+        const float yawError = std::remainder(targetYaw - _transform.rotation.y, TAU);
+        const float maxStep = turnSpeedDegrees * Canis::DEG2RAD * _dt;
+        const float appliedStep = std::clamp(yawError, -maxStep, maxStep);
+
+        _transform.rotation.y += appliedStep;
+        return std::remainder(targetYaw - _transform.rotation.y, TAU);
     }
 
     void MageZapTimeState::Exit()
     {
-        if (MageStateMachine* mageStatMachine = dynamic_cast<MageStateMachine*>(m_stateMachine))
-            mageStatMachine->ResetStaffPose();
+        if (MageStateMachine *mageStateMachine = dynamic_cast<MageStateMachine *>(m_stateMachine))
+            mageStateMachine->ResetStaffPose();
+    }
+    void MageZapTimeState::Fire(const Canis::Vector3 &_position, const Canis::Vector3 &_direction)
+    {
+        const Canis::Vector3 flatDirection = glm::normalize(Canis::Vector3(_direction.x, 0.0f, _direction.z));
+        const float yaw = std::atan2(-flatDirection.x, -flatDirection.z);
+        const Canis::Vector3 rotation = Canis::Vector3(0.0f, yaw, 0.0f);
+
+        auto *pool = SuperPupUtilities::SimpleObjectPool::Instance;
+
+        if (pool == nullptr)
+            return;
+
+        Canis::Entity *projectile = pool->Spawn("laser_bullet", _position, rotation);
+
+        if (projectile == nullptr)
+            return;
+
+        if (SuperPupUtilities::Bullet *bullet = projectile->GetScript<SuperPupUtilities::Bullet>())
+        {
+            bullet->speed = projectileSpeed * 10.0f;
+            bullet->lifeTime = projectileLifeTime;
+            bullet->hitImpulse = projectileHitImpulse;
+            bullet->Launch();
+        }
+    }
+        Canis::Vector3 MageZapTimeState::GetMuzzlePosition(const Canis::Transform& _transform) const
+    {
+        return _transform.GetGlobalPosition()
+            + (_transform.GetRight() * muzzleOffset.x)
+            + (_transform.GetUp() * muzzleOffset.y)
+            + (_transform.GetForward() * muzzleOffset.z);
     }
 
-    MageStateMachine::MageStateMachine(Canis::Entity& _entity) :
-        SuperPupUtilities::StateMachine(_entity),
-        idleState(*this),
-        chaseState(*this),
-        zapTimeState(*this) {}
+    MageStateMachine::MageStateMachine(Canis::Entity &_entity) : SuperPupUtilities::StateMachine(_entity),
+                                                                 idleState(*this),
+                                                                 chaseState(*this),
+                                                                 zapTimeState(*this) {}
 
-    void RegisterMageStateMachineScript(Canis::App& _app)
+    void RegisterMageStateMachineScript(Canis::App &_app)
     {
         REGISTER_PROPERTY(mageStateMachineConf, AICombat::MageStateMachine, targetTag);
         REGISTER_PROPERTY(mageStateMachineConf, AICombat::MageStateMachine, detectionRange);
@@ -120,8 +189,15 @@ namespace AICombat
         RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, staffRestHeight);
         RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, staffSwingHeight);
         RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, attackRange);
-        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, attackDuration);
-        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, attackDamageTime);
+        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, laserPrefab);
+        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, poolCode);
+        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, fireInterval);
+        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, turnSpeedDegrees);
+        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, fireAngleThresholdDegrees);
+        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, muzzleOffset);
+        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, projectileSpeed);
+        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, projectileLifeTime);
+        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, projectileHitImpulse);
         REGISTER_PROPERTY(mageStateMachineConf, AICombat::MageStateMachine, maxHealth);
         REGISTER_PROPERTY(mageStateMachineConf, AICombat::MageStateMachine, logStateChanges);
         REGISTER_PROPERTY(mageStateMachineConf, AICombat::MageStateMachine, staffVisual);
@@ -150,7 +226,7 @@ namespace AICombat
     {
         entity.GetComponent<Canis::Transform>();
 
-        Canis::Rigidbody& rigidbody = entity.GetComponent<Canis::Rigidbody>();
+        Canis::Rigidbody &rigidbody = entity.GetComponent<Canis::Rigidbody>();
         rigidbody.motionType = Canis::RigidbodyMotionType::KINEMATIC;
         rigidbody.useGravity = false;
         rigidbody.allowSleeping = false;
@@ -202,17 +278,17 @@ namespace AICombat
         SuperPupUtilities::StateMachine::Update(_dt);
     }
 
-    Canis::Entity* MageStateMachine::FindClosestTarget() const
+    Canis::Entity *MageStateMachine::FindClosestTarget() const
     {
         if (targetTag.empty() || !entity.HasComponent<Canis::Transform>())
             return nullptr;
 
-        const Canis::Transform& transform = entity.GetComponent<Canis::Transform>();
+        const Canis::Transform &transform = entity.GetComponent<Canis::Transform>();
         const Canis::Vector3 origin = transform.GetGlobalPosition();
-        Canis::Entity* closestTarget = nullptr;
+        Canis::Entity *closestTarget = nullptr;
         float closestDistance = detectionRange;
 
-        for (Canis::Entity* candidate : entity.scene.GetEntitiesWithTag(targetTag))
+        for (Canis::Entity *candidate : entity.scene.GetEntitiesWithTag(targetTag))
         {
             if (candidate == nullptr || candidate == &entity || !candidate->active)
                 continue;
@@ -220,7 +296,7 @@ namespace AICombat
             if (!candidate->HasComponent<Canis::Transform>())
                 continue;
 
-            if (const MageStateMachine* other = candidate->GetScript<MageStateMachine>())
+            if (const MageStateMachine *other = candidate->GetScript<MageStateMachine>())
             {
                 if (!other->IsAlive())
                     continue;
@@ -239,7 +315,7 @@ namespace AICombat
         return closestTarget;
     }
 
-    float MageStateMachine::DistanceTo(const Canis::Entity& _other) const
+    float MageStateMachine::DistanceTo(const Canis::Entity &_other) const
     {
         if (!entity.HasComponent<Canis::Transform>() || !_other.HasComponent<Canis::Transform>())
             return std::numeric_limits<float>::max();
@@ -249,12 +325,12 @@ namespace AICombat
         return glm::distance(selfPosition, targetPosition);
     }
 
-    void MageStateMachine::FaceTarget(const Canis::Entity& _target)
+    void MageStateMachine::FaceTarget(const Canis::Entity &_target)
     {
         if (!entity.HasComponent<Canis::Transform>() || !_target.HasComponent<Canis::Transform>())
             return;
 
-        Canis::Transform& transform = entity.GetComponent<Canis::Transform>();
+        Canis::Transform &transform = entity.GetComponent<Canis::Transform>();
         const Canis::Vector3 selfPosition = transform.GetGlobalPosition();
         Canis::Vector3 direction = _target.GetComponent<Canis::Transform>().GetGlobalPosition() - selfPosition;
         direction.y = 0.0f;
@@ -266,12 +342,12 @@ namespace AICombat
         transform.rotation.y = std::atan2(-direction.x, -direction.z);
     }
 
-    void MageStateMachine::MoveTowards(const Canis::Entity& _target, float _speed, float _dt)
+    void MageStateMachine::MoveTowards(const Canis::Entity &_target, float _speed, float _dt)
     {
         if (!entity.HasComponent<Canis::Transform>() || !_target.HasComponent<Canis::Transform>())
             return;
 
-        Canis::Transform& transform = entity.GetComponent<Canis::Transform>();
+        Canis::Transform &transform = entity.GetComponent<Canis::Transform>();
         const Canis::Vector3 selfPosition = transform.GetGlobalPosition();
         Canis::Vector3 direction = _target.GetComponent<Canis::Transform>().GetGlobalPosition() - selfPosition;
         direction.y = 0.0f;
@@ -283,7 +359,7 @@ namespace AICombat
         transform.position += direction * _speed * _dt;
     }
 
-    void MageStateMachine::ChangeState(const std::string& _stateName)
+    void MageStateMachine::ChangeState(const std::string &_stateName)
     {
         if (SuperPupUtilities::StateMachine::GetCurrentStateName() == _stateName)
             return;
@@ -297,7 +373,7 @@ namespace AICombat
             Canis::Debug::Log("%s -> %s", entity.name.c_str(), _stateName.c_str());
     }
 
-    const std::string& MageStateMachine::GetCurrentStateName() const
+    const std::string &MageStateMachine::GetCurrentStateName() const
     {
         return SuperPupUtilities::StateMachine::GetCurrentStateName();
     }
@@ -327,14 +403,14 @@ namespace AICombat
         if (staffVisual == nullptr || !staffVisual->HasComponent<Canis::Transform>())
             return;
 
-        Canis::Transform& staffTransform = staffVisual->GetComponent<Canis::Transform>();
+        Canis::Transform &staffTransform = staffVisual->GetComponent<Canis::Transform>();
         const float normalized = Clamp01(_normalized);
         const float swingBlend = (normalized <= 0.5f)
-            ? normalized * 2.0f
-            : (1.0f - normalized) * 2.0f;
+                                     ? normalized * 2.0f
+                                     : (1.0f - normalized) * 2.0f;
 
         staffTransform.position.y = DEG2RAD *
-            (zapTimeState.staffRestHeight + (zapTimeState.staffSwingHeight * swingBlend));
+                                    (zapTimeState.staffRestHeight + (zapTimeState.staffSwingHeight * swingBlend));
     }
 
     void MageStateMachine::TakeDamage(int _damage)
@@ -351,10 +427,10 @@ namespace AICombat
 
         if (m_hasBaseColor && entity.HasComponent<Canis::Material>())
         {
-            Canis::Material& material = entity.GetComponent<Canis::Material>();
+            Canis::Material &material = entity.GetComponent<Canis::Material>();
             const float healthRatio = (maxHealth > 0)
-                ? (static_cast<float>(m_currentHealth) / static_cast<float>(maxHealth))
-                : 0.0f;
+                                          ? (static_cast<float>(m_currentHealth) / static_cast<float>(maxHealth))
+                                          : 0.0f;
 
             material.color = Canis::Vector4(
                 m_baseColor.x * (0.5f + (0.5f * healthRatio)),
@@ -362,7 +438,6 @@ namespace AICombat
                 m_baseColor.z * (0.5f + (0.5f * healthRatio)),
                 m_baseColor.w);
         }
-
         if (m_currentHealth > 0)
             return;
 
@@ -375,7 +450,7 @@ namespace AICombat
 
     void MageStateMachine::PlayHitSfx()
     {
-        const Canis::AudioAssetHandle& selectedSfx = m_useFirstHitSfx ? hitSfxPath1 : hitSfxPath2;
+        const Canis::AudioAssetHandle &selectedSfx = m_useFirstHitSfx ? hitSfxPath1 : hitSfxPath2;
         m_useFirstHitSfx = !m_useFirstHitSfx;
 
         if (selectedSfx.Empty())
@@ -389,16 +464,16 @@ namespace AICombat
         if (deathEffectPrefab.Empty() || !entity.HasComponent<Canis::Transform>())
             return;
 
-        const Canis::Transform& sourceTransform = entity.GetComponent<Canis::Transform>();
+        const Canis::Transform &sourceTransform = entity.GetComponent<Canis::Transform>();
         const Canis::Vector3 spawnPosition = sourceTransform.GetGlobalPosition();
         const Canis::Vector3 spawnRotation = sourceTransform.GetGlobalRotation();
 
-        for (Canis::Entity* spawnedEntity : entity.scene.Instantiate(deathEffectPrefab))
+        for (Canis::Entity *spawnedEntity : entity.scene.Instantiate(deathEffectPrefab))
         {
             if (spawnedEntity == nullptr || !spawnedEntity->HasComponent<Canis::Transform>())
                 continue;
 
-            Canis::Transform& spawnedTransform = spawnedEntity->GetComponent<Canis::Transform>();
+            Canis::Transform &spawnedTransform = spawnedEntity->GetComponent<Canis::Transform>();
             spawnedTransform.position = spawnPosition;
             spawnedTransform.rotation = spawnRotation;
         }

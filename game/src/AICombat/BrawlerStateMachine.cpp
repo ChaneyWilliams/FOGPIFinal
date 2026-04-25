@@ -338,6 +338,7 @@ namespace AICombat
 
     void BrawlerStateMachine::TakeDamage(int _damage)
     {
+
         if (!IsAlive())
             return;
 
@@ -361,7 +362,6 @@ namespace AICombat
                 m_baseColor.z * (0.5f + (0.5f * healthRatio)),
                 m_baseColor.w);
         }
-
         if (m_currentHealth > 0)
             return;
 
