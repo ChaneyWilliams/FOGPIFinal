@@ -88,20 +88,19 @@ namespace AICombat
         if (target)
             mageStateMachine->FaceTarget(*target);
 
-        
-        Canis::Transform& transform = mageStateMachine->staffVisual->GetComponent<Canis::Transform>();
+        if (!mageStateMachine->staffVisual->HasComponent<Canis::Transform>())
+            return;
+
+        if (target == nullptr || !target->active || target->tag != target->tag)
+            target = mageStateMachine->FindClosestTarget();
+
+        if (target == nullptr || !target->HasComponent<Canis::Transform>())
+            return;
+
+        Canis::Transform &transform = mageStateMachine->staffVisual->GetComponent<Canis::Transform>();
         const Canis::Vector3 targetPosition = target->GetComponent<Canis::Transform>().GetGlobalPosition();
         Canis::Vector3 toTarget = targetPosition - transform.GetGlobalPosition();
         toTarget.y = 0.0f;
-
-        if(m_fireCooldown > 0.0f)
-            return;
-
-        const float duration = std::max(attackDuration, 0.001f);
-        mageStateMachine->SetStaffSwing(mageStateMachine->GetStateTime() / duration);
-
-         if (glm::length(toTarget) <= 0.001f)
-            return;
 
         const float angleError = RotateTowards(transform, toTarget, _dt);
         if (m_fireCooldown > 0.0f)
@@ -117,6 +116,9 @@ namespace AICombat
         Fire(GetMuzzlePosition(transform), toTarget);
         m_fireCooldown = fireInterval;
 
+        const float duration = std::max(attackDuration, 0.001f);
+        mageStateMachine->SetStaffSwing(mageStateMachine->GetStateTime() / duration);
+
         if (mageStateMachine->GetStateTime() < duration)
             return;
 
@@ -126,7 +128,7 @@ namespace AICombat
             mageStateMachine->ChangeState(MageIdleState::Name);
     }
 
-    float MageZapTimeState::RotateTowards(Canis::Transform& _transform, const Canis::Vector3& _direction, float _dt) const
+    float MageZapTimeState::RotateTowards(Canis::Transform &_transform, const Canis::Vector3 &_direction, float _dt) const
     {
         const Canis::Vector3 flatDirection = glm::normalize(Canis::Vector3(_direction.x, 0.0f, _direction.z));
         const float targetYaw = std::atan2(-flatDirection.x, -flatDirection.z);
@@ -145,6 +147,8 @@ namespace AICombat
     }
     void MageZapTimeState::Fire(const Canis::Vector3 &_position, const Canis::Vector3 &_direction)
     {
+        MageStateMachine *mageStateMachine = dynamic_cast<MageStateMachine *>(m_stateMachine);
+
         const Canis::Vector3 flatDirection = glm::normalize(Canis::Vector3(_direction.x, 0.0f, _direction.z));
         const float yaw = std::atan2(-flatDirection.x, -flatDirection.z);
         const Canis::Vector3 rotation = Canis::Vector3(0.0f, yaw, 0.0f);
@@ -152,12 +156,14 @@ namespace AICombat
         auto *pool = SuperPupUtilities::SimpleObjectPool::Instance;
 
         if (pool == nullptr)
-            return;
+        {Debug::Log("Pool is closed");
+            return;}
 
-        Canis::Entity *projectile = pool->Spawn("laser_bullet", _position, rotation);
+        Canis::Entity *projectile = (mageStateMachine->targetTag == "Red") ? pool->Spawn("blue_bullet", _position, rotation): pool->Spawn("red_bullet",_position, rotation);
 
-        if (projectile == nullptr)
-            return;
+        if (projectile == nullptr){
+            Debug::Log("Bad Bullet");
+            return;}
 
         if (SuperPupUtilities::Bullet *bullet = projectile->GetScript<SuperPupUtilities::Bullet>())
         {
@@ -167,12 +173,9 @@ namespace AICombat
             bullet->Launch();
         }
     }
-        Canis::Vector3 MageZapTimeState::GetMuzzlePosition(const Canis::Transform& _transform) const
+    Canis::Vector3 MageZapTimeState::GetMuzzlePosition(const Canis::Transform &_transform) const
     {
-        return _transform.GetGlobalPosition()
-            + (_transform.GetRight() * muzzleOffset.x)
-            + (_transform.GetUp() * muzzleOffset.y)
-            + (_transform.GetForward() * muzzleOffset.z);
+        return _transform.GetGlobalPosition() + (_transform.GetRight() * muzzleOffset.x) + (_transform.GetUp() * muzzleOffset.y) + (_transform.GetForward() * muzzleOffset.z);
     }
 
     MageStateMachine::MageStateMachine(Canis::Entity &_entity) : SuperPupUtilities::StateMachine(_entity),
@@ -198,6 +201,7 @@ namespace AICombat
         RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, projectileSpeed);
         RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, projectileLifeTime);
         RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, projectileHitImpulse);
+        RegisterAccessorProperty(mageStateMachineConf, AICombat::MageStateMachine, zapTimeState, m_fireCooldown);
         REGISTER_PROPERTY(mageStateMachineConf, AICombat::MageStateMachine, maxHealth);
         REGISTER_PROPERTY(mageStateMachineConf, AICombat::MageStateMachine, logStateChanges);
         REGISTER_PROPERTY(mageStateMachineConf, AICombat::MageStateMachine, staffVisual);

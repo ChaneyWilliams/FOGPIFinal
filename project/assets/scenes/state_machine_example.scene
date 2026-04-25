@@ -172,10 +172,16 @@ Entities:
       staffRestHeight: 0
       staffSwingHeight: 15
       attackRange: 7
-      attackDuration: 0.75
-      attackDamageTime: 0.25
-      damageHeight: 1
-      damage: 10
+      laserPrefab: 7929059865610937979
+      poolCode: blue_bullet
+      fireInterval: 0.5
+      turnSpeedDegrees: 120
+      fireAngleThresholdDegrees: 8
+      muzzleOffset: [0, 0.8, 0]
+      projectileSpeed: 14
+      projectileLifeTime: 4
+      projectileHitImpulse: 6
+      m_fireCooldown: 0
       maxHealth: 40
       logStateChanges: true
       staffVisual: 11979571633178964622
@@ -256,7 +262,7 @@ Entities:
       attackRange: 2.2
       attackDuration: 0.75
       attackDamageTime: 0.24
-      maxHealth: 40
+      maxHealth: 1000
       logStateChanges: true
       hammerVisual: 17922756738381035608
       hitSfxPath1:
@@ -404,7 +410,7 @@ Entities:
       attackRange: 2.2
       attackDuration: 0.75
       attackDamageTime: 0.24
-      maxHealth: 40
+      maxHealth: 1000
       logStateChanges: true
       hammerVisual: 9209471912903814673
       hitSfxPath1:
@@ -491,3 +497,15 @@ Entities:
       sensorSize: [1, 1, 1]
       damage: 20
       targetTag: Red
+  - Entity: 17498691983976051193
+    Name: MageBulletPool
+    Tag: ""
+    SuperPupUtilities::SimpleObjectPool:
+      logWarnings: true
+      pools:
+        - code: laser_bullet
+          prefab: 16543449644754534652
+          size: 6
+        - code: blue_bullet
+          prefab: 7929059865610937979
+          size: 5

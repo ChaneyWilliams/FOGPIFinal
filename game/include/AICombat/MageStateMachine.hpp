@@ -50,6 +50,8 @@ namespace AICombat
         float projectileSpeed = 14.0f;
         float projectileLifeTime = 4.0f;
         float projectileHitImpulse = 6.0f;
+         float m_fireCooldown = 0.0f;
+
 
         explicit MageZapTimeState(SuperPupUtilities::StateMachine &_stateMachine);
         void Enter() override;
@@ -57,10 +59,9 @@ namespace AICombat
         void Exit() override;
 
     private:
-        float m_fireCooldown = 0.0f;
+        Canis::Vector3 GetMuzzlePosition(const Canis::Transform& _transform) const;
         float RotateTowards(Canis::Transform& _transform, const Canis::Vector3& _direction, float _dt) const;
-        Canis::Vector3 GetMuzzlePosition(const Canis::Transform &_transform) const;
-        void Fire(const Canis::Vector3 &_position, const Canis::Vector3 &_direction);
+        void Fire(const Canis::Vector3& _position, const Canis::Vector3& _direction);
     };
 
     class MageStateMachine : public SuperPupUtilities::StateMachine, public ICombatant
