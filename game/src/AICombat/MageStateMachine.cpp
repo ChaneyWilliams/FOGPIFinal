@@ -6,6 +6,7 @@
 #include <Canis/Debug.hpp>
 #include <SuperPupUtilities/Bullet.hpp>
 #include <SuperPupUtilities/SimpleObjectPool.hpp>
+#include <AICombat/BulletDamage.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -172,6 +173,8 @@ namespace AICombat
             bullet->hitImpulse = projectileHitImpulse;
             bullet->Launch();
         }
+        if(AICombat::BulletDamage *bullet = projectile->GetScript<AICombat::BulletDamage>())
+            bullet->owner = mageStateMachine;
     }
     Canis::Vector3 MageZapTimeState::GetMuzzlePosition(const Canis::Transform &_transform) const
     {

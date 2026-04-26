@@ -12,6 +12,27 @@ Entities:
       parent: 0
       children:
         []
+    Canis::Rigidbody:
+      active: true
+      motionType: 0
+      mass: 1
+      friction: 0.2
+      restitution: 0
+      linearDamping: 0.05
+      angularDamping: 0.05
+      useGravity: false
+      isSensor: true
+      layer: 1
+      mask: 4294967295
+      allowSleeping: false
+      lockRotationX: false
+      lockRotationY: false
+      lockRotationZ: false
+      linearVelocity: [0, 0, 0]
+      angularVelocity: [0, 0, 0]
+    Canis::BoxCollider:
+      active: true
+      size: [1, 1, 1]
     Canis::PointLight:
       enabled: true
       color: [1, 0, 0, 1]
@@ -25,6 +46,11 @@ Entities:
       color: [1, 1, 1, 1]
       ModelAsset:
         uuid: 17154083321347000101
+    AICombat::BulletDamage:
+      owner: 0
+      sensorSize: [1, 1, 1]
+      damage: 10
+      targetTag: Blue
     SuperPupUtilities::Bullet:
       damage: 1
       speed: 14
