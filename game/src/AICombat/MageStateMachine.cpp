@@ -173,8 +173,8 @@ namespace AICombat
             bullet->hitImpulse = projectileHitImpulse;
             bullet->Launch();
         }
-        if(AICombat::BulletDamage *bullet = projectile->GetScript<AICombat::BulletDamage>())
-            bullet->owner = mageStateMachine;
+        //if(AICombat::BulletDamage *bullet = projectile->GetScript<AICombat::BulletDamage>())
+        //    bullet->owner = mageStateMachine;
     }
     Canis::Vector3 MageZapTimeState::GetMuzzlePosition(const Canis::Transform &_transform) const
     {

@@ -12,8 +12,8 @@ namespace AICombat
     {
     public:
         static constexpr const char* ScriptName = "AICombat::BulletDamage";
-
-        MageStateMachine* owner = nullptr;
+        //MageStateMachine is a partial class and the Macro hates that
+        //MageStateMachine* owner = nullptr;
         Canis::Vector3 sensorSize = Canis::Vector3(1.0f);
         int damage = 10;
         std::string targetTag = "";
