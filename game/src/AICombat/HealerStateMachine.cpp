@@ -1,5 +1,6 @@
 #include <AICombat/HealerStateMachine.hpp>
-
+#include <AICombat/BrawlerStateMachine.hpp>
+#include <AICombat/MageStateMachine.hpp>
 #include <Canis/App.hpp>
 #include <Canis/AudioManager.hpp>
 #include <Canis/ConfigHelper.hpp>
@@ -16,40 +17,38 @@ namespace AICombat
         ScriptConf healerStateMachineConf = {};
     }
 
-    HealerIdleState::HealerIdleState(SuperPupUtilities::StateMachine& _stateMachine) :
-        State(Name, _stateMachine) {}
+    HealerIdleState::HealerIdleState(SuperPupUtilities::StateMachine &_stateMachine) : State(Name, _stateMachine) {}
 
     void HealerIdleState::Enter()
     {
-        if (HealerStateMachine* brawlerStatMachine = dynamic_cast<HealerStateMachine*>(m_stateMachine))
+        if (HealerStateMachine *brawlerStatMachine = dynamic_cast<HealerStateMachine *>(m_stateMachine))
             brawlerStatMachine->ResetHammerPose();
     }
 
     void HealerIdleState::Update(float)
     {
-        if (HealerStateMachine* brawlerStatMachine = dynamic_cast<HealerStateMachine*>(m_stateMachine))
+        if (HealerStateMachine *brawlerStatMachine = dynamic_cast<HealerStateMachine *>(m_stateMachine))
         {
             if (brawlerStatMachine->FindClosestTarget() != nullptr)
                 brawlerStatMachine->ChangeState(HealerChaseState::Name);
         }
     }
 
-    HealerChaseState::HealerChaseState(SuperPupUtilities::StateMachine& _stateMachine) :
-        State(Name, _stateMachine) {}
+    HealerChaseState::HealerChaseState(SuperPupUtilities::StateMachine &_stateMachine) : State(Name, _stateMachine) {}
 
     void HealerChaseState::Enter()
     {
-        if (HealerStateMachine* brawlerStatMachine = dynamic_cast<HealerStateMachine*>(m_stateMachine))
+        if (HealerStateMachine *brawlerStatMachine = dynamic_cast<HealerStateMachine *>(m_stateMachine))
             brawlerStatMachine->ResetHammerPose();
     }
 
     void HealerChaseState::Update(float _dt)
     {
-        HealerStateMachine* brawlerStatMachine = dynamic_cast<HealerStateMachine*>(m_stateMachine);
+        HealerStateMachine *brawlerStatMachine = dynamic_cast<HealerStateMachine *>(m_stateMachine);
         if (brawlerStatMachine == nullptr)
             return;
 
-        Canis::Entity* target = brawlerStatMachine->FindClosestTarget();
+        Canis::Entity *target = brawlerStatMachine->FindClosestTarget();
 
         if (target == nullptr)
         {
@@ -68,22 +67,21 @@ namespace AICombat
         brawlerStatMachine->MoveTowards(*target, moveSpeed, _dt);
     }
 
-    HealerHammerTimeState::HealerHammerTimeState(SuperPupUtilities::StateMachine& _stateMachine) :
-        State(Name, _stateMachine) {}
+    HealerHammerTimeState::HealerHammerTimeState(SuperPupUtilities::StateMachine &_stateMachine) : State(Name, _stateMachine) {}
 
     void HealerHammerTimeState::Enter()
     {
-        if (HealerStateMachine* brawlerStatMachine = dynamic_cast<HealerStateMachine*>(m_stateMachine))
+        if (HealerStateMachine *brawlerStatMachine = dynamic_cast<HealerStateMachine *>(m_stateMachine))
             brawlerStatMachine->SetHammerSwing(0.0f);
     }
 
     void HealerHammerTimeState::Update(float)
     {
-        HealerStateMachine* brawlerStatMachine = dynamic_cast<HealerStateMachine*>(m_stateMachine);
+        HealerStateMachine *brawlerStatMachine = dynamic_cast<HealerStateMachine *>(m_stateMachine);
         if (brawlerStatMachine == nullptr)
             return;
 
-        if (Canis::Entity* target = brawlerStatMachine->FindClosestTarget())
+        if (Canis::Entity *target = brawlerStatMachine->FindClosestTarget())
             brawlerStatMachine->FaceTarget(*target);
 
         const float duration = std::max(attackDuration, 0.001f);
@@ -100,17 +98,16 @@ namespace AICombat
 
     void HealerHammerTimeState::Exit()
     {
-        if (HealerStateMachine* brawlerStatMachine = dynamic_cast<HealerStateMachine*>(m_stateMachine))
+        if (HealerStateMachine *brawlerStatMachine = dynamic_cast<HealerStateMachine *>(m_stateMachine))
             brawlerStatMachine->ResetHammerPose();
     }
 
-    HealerStateMachine::HealerStateMachine(Canis::Entity& _entity) :
-        SuperPupUtilities::StateMachine(_entity),
-        idleState(*this),
-        chaseState(*this),
-        hammerTimeState(*this) {}
+    HealerStateMachine::HealerStateMachine(Canis::Entity &_entity) : SuperPupUtilities::StateMachine(_entity),
+                                                                     idleState(*this),
+                                                                     chaseState(*this),
+                                                                     hammerTimeState(*this) {}
 
-    void RegisterHealerStateMachineScript(Canis::App& _app)
+    void RegisterHealerStateMachineScript(Canis::App &_app)
     {
         REGISTER_PROPERTY(healerStateMachineConf, AICombat::HealerStateMachine, targetTag);
         REGISTER_PROPERTY(healerStateMachineConf, AICombat::HealerStateMachine, detectionRange);
@@ -149,7 +146,7 @@ namespace AICombat
     {
         entity.GetComponent<Canis::Transform>();
 
-        Canis::Rigidbody& rigidbody = entity.GetComponent<Canis::Rigidbody>();
+        Canis::Rigidbody &rigidbody = entity.GetComponent<Canis::Rigidbody>();
         rigidbody.motionType = Canis::RigidbodyMotionType::KINEMATIC;
         rigidbody.useGravity = false;
         rigidbody.allowSleeping = false;
@@ -201,20 +198,19 @@ namespace AICombat
         SuperPupUtilities::StateMachine::Update(_dt);
     }
 
-    Canis::Entity* HealerStateMachine::FindClosestTarget() const
+    Canis::Entity *HealerStateMachine::FindClosestTarget() const
     {
         if (targetTag.empty() || !entity.HasComponent<Canis::Transform>())
             return nullptr;
 
-        const Canis::Transform& transform = entity.GetComponent<Canis::Transform>();
+        const Canis::Transform &transform = entity.GetComponent<Canis::Transform>();
         const Canis::Vector3 origin = transform.GetGlobalPosition();
-        Canis::Entity* closestTarget = nullptr;
+
+        Canis::Entity *bestTarget = nullptr;
         float closestDistance = detectionRange;
+        int lowestHealth = INT_MAX;
 
-        int lowestHealth = 0;
-        Entity* target;
-
-        for (Canis::Entity* candidate : entity.scene.GetEntitiesWithTag(targetTag))
+        for (Canis::Entity *candidate : entity.scene.GetEntitiesWithTag(targetTag))
         {
             if (candidate == nullptr || candidate == &entity || !candidate->active)
                 continue;
@@ -222,26 +218,57 @@ namespace AICombat
             if (!candidate->HasComponent<Canis::Transform>())
                 continue;
 
-            if (const HealerStateMachine* other = candidate->GetScript<HealerStateMachine>())
+            int health = -1;
+            int maxHealth = -1;
+            bool isAlive = false;
+
+            if (HealerStateMachine *h = candidate->GetScript<HealerStateMachine>())
             {
-                if (!other->IsAlive())
-                    continue;
+                health = h->GetCurrentHealth();
+                maxHealth = h->maxHealth;
+                isAlive = h->IsAlive();
+            }
+            else if (BrawlerStateMachine *b = candidate->GetScript<BrawlerStateMachine>())
+            {
+                health = b->GetCurrentHealth();
+                maxHealth = b->maxHealth;
+                isAlive = b->IsAlive();
+            }
+            else if (MageStateMachine *m = candidate->GetScript<MageStateMachine>())
+            {
+                health = m->GetCurrentHealth();
+                maxHealth = m->maxHealth;
+                isAlive = m->IsAlive();
+            }
+            else
+            {
+                continue; 
             }
 
-            const Canis::Vector3 candidatePosition = candidate->GetComponent<Canis::Transform>().GetGlobalPosition();
-            const float distance = glm::distance(origin, candidatePosition);
+            if (!isAlive || health >= maxHealth)
+                continue; 
 
-            if (distance > detectionRange || distance >= closestDistance)
+            const Canis::Vector3 candidatePosition =
+                candidate->GetComponent<Canis::Transform>().GetGlobalPosition();
+
+            float distance = glm::distance(origin, candidatePosition);
+
+            if (distance > detectionRange)
                 continue;
 
-            closestDistance = distance;
-            closestTarget = candidate;
+            if (health < lowestHealth ||
+                (health == lowestHealth && distance < closestDistance))
+            {
+                lowestHealth = health;
+                closestDistance = distance;
+                bestTarget = candidate;
+            }
         }
 
-        return closestTarget;
+        return bestTarget;
     }
 
-    float HealerStateMachine::DistanceTo(const Canis::Entity& _other) const
+    float HealerStateMachine::DistanceTo(const Canis::Entity &_other) const
     {
         if (!entity.HasComponent<Canis::Transform>() || !_other.HasComponent<Canis::Transform>())
             return std::numeric_limits<float>::max();
@@ -251,12 +278,12 @@ namespace AICombat
         return glm::distance(selfPosition, targetPosition);
     }
 
-    void HealerStateMachine::FaceTarget(const Canis::Entity& _target)
+    void HealerStateMachine::FaceTarget(const Canis::Entity &_target)
     {
         if (!entity.HasComponent<Canis::Transform>() || !_target.HasComponent<Canis::Transform>())
             return;
 
-        Canis::Transform& transform = entity.GetComponent<Canis::Transform>();
+        Canis::Transform &transform = entity.GetComponent<Canis::Transform>();
         const Canis::Vector3 selfPosition = transform.GetGlobalPosition();
         Canis::Vector3 direction = _target.GetComponent<Canis::Transform>().GetGlobalPosition() - selfPosition;
         direction.y = 0.0f;
@@ -268,12 +295,12 @@ namespace AICombat
         transform.rotation.y = std::atan2(-direction.x, -direction.z);
     }
 
-    void HealerStateMachine::MoveTowards(const Canis::Entity& _target, float _speed, float _dt)
+    void HealerStateMachine::MoveTowards(const Canis::Entity &_target, float _speed, float _dt)
     {
         if (!entity.HasComponent<Canis::Transform>() || !_target.HasComponent<Canis::Transform>())
             return;
 
-        Canis::Transform& transform = entity.GetComponent<Canis::Transform>();
+        Canis::Transform &transform = entity.GetComponent<Canis::Transform>();
         const Canis::Vector3 selfPosition = transform.GetGlobalPosition();
         Canis::Vector3 direction = _target.GetComponent<Canis::Transform>().GetGlobalPosition() - selfPosition;
         direction.y = 0.0f;
@@ -285,7 +312,7 @@ namespace AICombat
         transform.position += direction * _speed * _dt;
     }
 
-    void HealerStateMachine::ChangeState(const std::string& _stateName)
+    void HealerStateMachine::ChangeState(const std::string &_stateName)
     {
         if (SuperPupUtilities::StateMachine::GetCurrentStateName() == _stateName)
             return;
@@ -299,7 +326,7 @@ namespace AICombat
             Canis::Debug::Log("%s -> %s", entity.name.c_str(), _stateName.c_str());
     }
 
-    const std::string& HealerStateMachine::GetCurrentStateName() const
+    const std::string &HealerStateMachine::GetCurrentStateName() const
     {
         return SuperPupUtilities::StateMachine::GetCurrentStateName();
     }
@@ -329,14 +356,14 @@ namespace AICombat
         if (hammerVisual == nullptr || !hammerVisual->HasComponent<Canis::Transform>())
             return;
 
-        Canis::Transform& hammerTransform = hammerVisual->GetComponent<Canis::Transform>();
+        Canis::Transform &hammerTransform = hammerVisual->GetComponent<Canis::Transform>();
         const float normalized = Clamp01(_normalized);
         const float swingBlend = (normalized <= 0.5f)
-            ? normalized * 2.0f
-            : (1.0f - normalized) * 2.0f;
+                                     ? normalized * 2.0f
+                                     : (1.0f - normalized) * 2.0f;
 
         hammerTransform.rotation.x = DEG2RAD *
-            (hammerTimeState.hammerRestDegrees + (hammerTimeState.hammerSwingDegrees * swingBlend));
+                                     (hammerTimeState.hammerRestDegrees + (hammerTimeState.hammerSwingDegrees * swingBlend));
     }
 
     void HealerStateMachine::TakeDamage(int _damage)
@@ -354,10 +381,10 @@ namespace AICombat
 
         if (m_hasBaseColor && entity.HasComponent<Canis::Material>())
         {
-            Canis::Material& material = entity.GetComponent<Canis::Material>();
+            Canis::Material &material = entity.GetComponent<Canis::Material>();
             const float healthRatio = (maxHealth > 0)
-                ? (static_cast<float>(m_currentHealth) / static_cast<float>(maxHealth))
-                : 0.0f;
+                                          ? (static_cast<float>(m_currentHealth) / static_cast<float>(maxHealth))
+                                          : 0.0f;
 
             material.color = Canis::Vector4(
                 m_baseColor.x * (0.5f + (0.5f * healthRatio)),
@@ -377,7 +404,7 @@ namespace AICombat
 
     void HealerStateMachine::PlayHitSfx()
     {
-        const Canis::AudioAssetHandle& selectedSfx = m_useFirstHitSfx ? hitSfxPath1 : hitSfxPath2;
+        const Canis::AudioAssetHandle &selectedSfx = m_useFirstHitSfx ? hitSfxPath1 : hitSfxPath2;
         m_useFirstHitSfx = !m_useFirstHitSfx;
 
         if (selectedSfx.Empty())
@@ -391,16 +418,16 @@ namespace AICombat
         if (deathEffectPrefab.Empty() || !entity.HasComponent<Canis::Transform>())
             return;
 
-        const Canis::Transform& sourceTransform = entity.GetComponent<Canis::Transform>();
+        const Canis::Transform &sourceTransform = entity.GetComponent<Canis::Transform>();
         const Canis::Vector3 spawnPosition = sourceTransform.GetGlobalPosition();
         const Canis::Vector3 spawnRotation = sourceTransform.GetGlobalRotation();
 
-        for (Canis::Entity* spawnedEntity : entity.scene.Instantiate(deathEffectPrefab))
+        for (Canis::Entity *spawnedEntity : entity.scene.Instantiate(deathEffectPrefab))
         {
             if (spawnedEntity == nullptr || !spawnedEntity->HasComponent<Canis::Transform>())
                 continue;
 
-            Canis::Transform& spawnedTransform = spawnedEntity->GetComponent<Canis::Transform>();
+            Canis::Transform &spawnedTransform = spawnedEntity->GetComponent<Canis::Transform>();
             spawnedTransform.position = spawnPosition;
             spawnedTransform.rotation = spawnRotation;
         }
