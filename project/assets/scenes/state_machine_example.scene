@@ -257,8 +257,8 @@ Entities:
       detectionRange: 20
       bodyColliderSize: [1, 1, 1]
       moveSpeed: 4
-      hammerRestDegrees: 140
-      hammerSwingDegrees: -120
+      hammerRestDegrees: 0
+      hammerSwingDegrees: 30
       attackRange: 2.25
       attackDuration: 0.75
       attackDamageTime: 0.25
@@ -322,7 +322,7 @@ Entities:
       active: true
       position: [0, -1.4210855e-14, -1.4746836]
       rotation: [0, -0, 0]
-      scale: [1, 1, 1]
+      scale: [0.5, 0.5, 0.5]
       parent: 17922756738381035608
       children:
         []
@@ -336,8 +336,8 @@ Entities:
       angularDamping: 0.05
       useGravity: false
       isSensor: true
-      layer: 16
-      mask: 2
+      layer: 255
+      mask: 255
       allowSleeping: false
       lockRotationX: false
       lockRotationY: false
@@ -360,6 +360,8 @@ Entities:
       sensorSize: [1, 1, 1]
       damage: 10
       targetTag: ""
+    RollABall::PickupSpinner:
+      spinSpeedDegrees: 120
   - Entity: 12870976119156114773
     Name: Blue Healer
     Tag: Blue
@@ -459,7 +461,7 @@ Entities:
       active: true
       position: [0, -1.4210855e-14, -1.4746836]
       rotation: [0, -0, 0]
-      scale: [1, 1, 1]
+      scale: [0.5, 0.5, 0.5]
       parent: 9209471912903814673
       children:
         []
@@ -497,6 +499,8 @@ Entities:
       sensorSize: [1, 1, 1]
       damage: 10
       targetTag: ""
+    RollABall::PickupSpinner:
+      spinSpeedDegrees: 120
   - Entity: 17498691983976051193
     Name: MageBulletPool
     Tag: ""
