@@ -242,11 +242,11 @@ namespace AICombat
             }
             else
             {
-                continue; 
+                continue;
             }
 
             if (!isAlive || health >= maxHealth)
-                continue; 
+                continue;
 
             const Canis::Vector3 candidatePosition =
                 candidate->GetComponent<Canis::Transform>().GetGlobalPosition();
@@ -358,12 +358,16 @@ namespace AICombat
 
         Canis::Transform &hammerTransform = hammerVisual->GetComponent<Canis::Transform>();
         const float normalized = Clamp01(_normalized);
-        const float swingBlend = (normalized <= 0.5f)
-                                     ? normalized * 2.0f
-                                     : (1.0f - normalized) * 2.0f;
+
+
+        const float angle = normalized * 2.0f * PI;
+
+
+        const float swing = sinf(angle);
 
         hammerTransform.rotation.x = DEG2RAD *
-                                     (hammerTimeState.hammerRestDegrees + (hammerTimeState.hammerSwingDegrees * swingBlend));
+                                     (hammerTimeState.hammerRestDegrees +
+                                      hammerTimeState.hammerSwingDegrees * swing);
     }
 
     void HealerStateMachine::TakeDamage(int _damage)
@@ -372,9 +376,7 @@ namespace AICombat
         if (!IsAlive())
             return;
 
-        const int damageToApply = std::max(_damage, 0);
-        if (damageToApply <= 0)
-            return;
+        const int damageToApply = _damage;
 
         m_currentHealth = std::max(0, m_currentHealth - damageToApply);
         PlayHitSfx();

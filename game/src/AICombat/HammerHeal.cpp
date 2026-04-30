@@ -2,6 +2,7 @@
 
 #include <Canis/App.hpp>
 #include <Canis/ConfigHelper.hpp>
+#include <Canis/Debug.hpp>
 
 #include <algorithm>
 
@@ -86,7 +87,6 @@ namespace AICombat
             m_hitTargetsThisSwing.clear();
             return;
         }
-
         for (Canis::Entity* other : entity.GetComponent<Canis::BoxCollider>().entered)
         {
             if (other == nullptr || !other->active || other == owner || HasDamagedThisSwing(*other))
@@ -98,8 +98,7 @@ namespace AICombat
 
             if (other->tag != targetTag)
                 continue;
-
-            targetStateMachine->TakeDamage(-damage);
+            targetStateMachine->TakeDamage(damage);
             m_hitTargetsThisSwing.push_back(other);
         }
     }

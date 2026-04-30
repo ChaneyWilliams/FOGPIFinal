@@ -89,7 +89,6 @@ namespace AICombat
             if (other->tag != targetTag)
                 continue;
 
-            Debug::Log("HYUP");
             targetStateMachine->TakeDamage(damage);
             m_hitTargetsThisSwing.push_back(other);
         }

@@ -2,6 +2,7 @@
 
 #include <Canis/App.hpp>
 #include <Canis/ConfigHelper.hpp>
+#include <Canis/Debug.hpp>
 
 #include <algorithm>
 

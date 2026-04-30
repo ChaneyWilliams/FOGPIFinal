@@ -36,8 +36,8 @@ namespace AICombat
     {
     public:
         static constexpr const char* Name = "HealerHammerTimeState";
-        float hammerRestDegrees = 140.0f;
-        float hammerSwingDegrees = -120.0f;
+        float hammerRestDegrees = 0.0f;
+        float hammerSwingDegrees = 30.0f;
         float attackRange = 2.25f;
         float attackDuration = 0.75f;
         float attackDamageTime = 0.25f;
