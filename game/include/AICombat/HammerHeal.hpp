@@ -17,6 +17,9 @@ namespace AICombat
         Canis::Vector3 sensorSize = Canis::Vector3(1.0f);
         int damage = 10;
         std::string targetTag = "";
+        Canis::AudioAssetHandle healSfxPath1 = {.path = "assets/audio/sfx/healing_sound.ogg"};
+        Canis::AudioAssetHandle healSfxPath2 = {.path = "assets/audio/sfx/healing_sound1.ogg"};
+        float healSfxVolume = 1.0f;
 
         explicit HammerHeal(Canis::Entity& _entity) : Canis::ScriptableEntity(_entity) {}
 
@@ -30,8 +33,11 @@ namespace AICombat
         HealerStateMachine* GetOwnerStateMachine();
         Canis::Entity* FindOwnerFromHierarchy() const;
         bool HasDamagedThisSwing(Canis::Entity& _target) const;
+        void PlayHealsSfx();
+        
 
         std::vector<Canis::Entity*> m_hitTargetsThisSwing = {};
+        bool m_usedHealSound1 = true;
     };
 
     void RegisterHammerHealScript(Canis::App& _app);
