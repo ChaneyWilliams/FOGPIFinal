@@ -50,8 +50,10 @@ namespace AICombat
         float projectileSpeed = 14.0f;
         float projectileLifeTime = 4.0f;
         float projectileHitImpulse = 6.0f;
-         float m_fireCooldown = 0.0f;
-
+        float m_fireCooldown = 0.0f;
+        float shotSfxVolume = 1.0f;
+        Canis::AudioAssetHandle shotSfxPath1 = {.path = "assets/audio/sfx/blaster.ogg"};
+        Canis::AudioAssetHandle shotSfxPath2 = {.path = "assets/audio/sfx/blaster1.ogg"};
 
         explicit MageZapTimeState(SuperPupUtilities::StateMachine &_stateMachine);
         void Enter() override;
@@ -59,9 +61,12 @@ namespace AICombat
         void Exit() override;
 
     private:
-        Canis::Vector3 GetMuzzlePosition(const Canis::Transform& _transform) const;
-        float RotateTowards(Canis::Transform& _transform, const Canis::Vector3& _direction, float _dt) const;
-        void Fire(const Canis::Vector3& _position, const Canis::Vector3& _direction);
+        Canis::Vector3 GetMuzzlePosition(const Canis::Transform &_transform) const;
+        float RotateTowards(Canis::Transform &_transform, const Canis::Vector3 &_direction, float _dt) const;
+        void Fire(const Canis::Vector3 &_position, const Canis::Vector3 &_direction);
+        void PlayShotsSfx();
+
+        bool m_usedShotSound1 = true;
     };
 
     class MageStateMachine : public SuperPupUtilities::StateMachine, public ICombatant

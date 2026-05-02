@@ -171,6 +171,7 @@ namespace AICombat
             bullet->speed = projectileSpeed * 10.0f;
             bullet->lifeTime = projectileLifeTime;
             bullet->hitImpulse = projectileHitImpulse;
+            PlayShotsSfx();
             bullet->Launch();
         }
         //if(AICombat::BulletDamage *bullet = projectile->GetScript<AICombat::BulletDamage>())
@@ -179,6 +180,16 @@ namespace AICombat
     Canis::Vector3 MageZapTimeState::GetMuzzlePosition(const Canis::Transform &_transform) const
     {
         return _transform.GetGlobalPosition() + (_transform.GetRight() * muzzleOffset.x) + (_transform.GetUp() * muzzleOffset.y) + (_transform.GetForward() * muzzleOffset.z);
+    }
+    void MageZapTimeState::PlayShotsSfx()
+    {
+        const Canis::AudioAssetHandle &selectedSfx = m_usedShotSound1 ? shotSfxPath1 : shotSfxPath2;
+        m_usedShotSound1 = !m_usedShotSound1;
+
+        if (selectedSfx.Empty())
+            return;
+
+        Canis::AudioManager::PlaySFX(selectedSfx, std::clamp(shotSfxVolume, 0.0f, 1.0f));
     }
 
     MageStateMachine::MageStateMachine(Canis::Entity &_entity) : SuperPupUtilities::StateMachine(_entity),
