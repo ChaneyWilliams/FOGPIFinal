@@ -98,7 +98,7 @@ namespace AICombat
 
             if (other->tag != targetTag)
                 continue;
-            targetStateMachine->TakeDamage(damage);
+            targetStateMachine->TakeDamage(-damage);
             m_hitTargetsThisSwing.push_back(other);
         }
     }

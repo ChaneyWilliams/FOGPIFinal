@@ -336,7 +336,6 @@ namespace AICombat
     {
         if (!IsAlive())
             return;
-
         const int damageToApply = _damage;
 
         m_currentHealth = std::max(0, m_currentHealth - damageToApply);
