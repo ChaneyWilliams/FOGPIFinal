@@ -1,5 +1,5 @@
 #include <AICombat/HammerDamage.hpp>
-
+#include <Canis/AudioManager.hpp>
 #include <Canis/App.hpp>
 #include <Canis/ConfigHelper.hpp>
 #include <Canis/Debug.hpp>
@@ -13,7 +13,7 @@ namespace AICombat
         ScriptConf hammerDamageConf = {};
     }
 
-    void RegisterHammerDamageScript(Canis::App& _app)
+    void RegisterHammerDamageScript(Canis::App &_app)
     {
         REGISTER_PROPERTY(hammerDamageConf, AICombat::HammerDamage, owner);
         REGISTER_PROPERTY(hammerDamageConf, AICombat::HammerDamage, sensorSize);
@@ -38,7 +38,7 @@ namespace AICombat
     {
         entity.GetComponent<Canis::Transform>();
 
-        Canis::Rigidbody& rigidbody = entity.GetComponent<Canis::Rigidbody>();
+        Canis::Rigidbody &rigidbody = entity.GetComponent<Canis::Rigidbody>();
         rigidbody.motionType = Canis::RigidbodyMotionType::STATIC;
         rigidbody.useGravity = false;
         rigidbody.isSensor = true;
@@ -56,7 +56,7 @@ namespace AICombat
 
         if (targetTag.empty())
         {
-            if (BrawlerStateMachine* ownerStateMachine = GetOwnerStateMachine())
+            if (BrawlerStateMachine *ownerStateMachine = GetOwnerStateMachine())
                 targetTag = ownerStateMachine->targetTag;
         }
     }
@@ -71,7 +71,7 @@ namespace AICombat
         if (!entity.HasComponents<Canis::BoxCollider, Canis::Rigidbody>())
             return;
 
-        BrawlerStateMachine* ownerStateMachine = GetOwnerStateMachine();
+        BrawlerStateMachine *ownerStateMachine = GetOwnerStateMachine();
         if (ownerStateMachine == nullptr || !ownerStateMachine->IsAlive())
         {
             m_hitTargetsThisSwing.clear();
@@ -88,24 +88,24 @@ namespace AICombat
             return;
         }
 
-        for (Canis::Entity* other : entity.GetComponent<Canis::BoxCollider>().entered)
+        for (Canis::Entity *other : entity.GetComponent<Canis::BoxCollider>().entered)
         {
             if (other == nullptr || !other->active || other == owner || HasDamagedThisSwing(*other))
                 continue;
 
-            AICombat::ICombatant* targetStateMachine = other->GetScript<AICombat::ICombatant>();
+            AICombat::ICombatant *targetStateMachine = other->GetScript<AICombat::ICombatant>();
             if (targetStateMachine == nullptr || !targetStateMachine->IsAlive())
                 continue;
 
             if (other->tag != targetTag)
                 continue;
-
+            PlayBonksSfx();
             targetStateMachine->TakeDamage(damage);
             m_hitTargetsThisSwing.push_back(other);
         }
     }
 
-    BrawlerStateMachine* HammerDamage::GetOwnerStateMachine()
+    BrawlerStateMachine *HammerDamage::GetOwnerStateMachine()
     {
         if (owner == nullptr)
             owner = FindOwnerFromHierarchy();
@@ -116,12 +116,12 @@ namespace AICombat
         return owner->GetScript<BrawlerStateMachine>();
     }
 
-    Canis::Entity* HammerDamage::FindOwnerFromHierarchy() const
+    Canis::Entity *HammerDamage::FindOwnerFromHierarchy() const
     {
         if (!entity.HasComponent<Canis::Transform>())
             return nullptr;
 
-        Canis::Entity* current = entity.GetComponent<Canis::Transform>().parent;
+        Canis::Entity *current = entity.GetComponent<Canis::Transform>().parent;
         while (current != nullptr)
         {
             if (current->HasScript<AICombat::ICombatant>())
@@ -136,9 +136,18 @@ namespace AICombat
         return nullptr;
     }
 
-    bool HammerDamage::HasDamagedThisSwing(Canis::Entity& _target) const
+    bool HammerDamage::HasDamagedThisSwing(Canis::Entity &_target) const
     {
-        return std::find(m_hitTargetsThisSwing.begin(), m_hitTargetsThisSwing.end(), &_target)
-            != m_hitTargetsThisSwing.end();
+        return std::find(m_hitTargetsThisSwing.begin(), m_hitTargetsThisSwing.end(), &_target) != m_hitTargetsThisSwing.end();
+    }
+    void HammerDamage::PlayBonksSfx()
+    {
+        const Canis::AudioAssetHandle &selectedSfx = m_usedBonk1Sound ? bonkSfxPath1 : bonkSfxPath2;
+        m_usedBonk1Sound = !m_usedBonk1Sound;
+
+        if (selectedSfx.Empty())
+            return;
+
+        Canis::AudioManager::PlaySFX(selectedSfx, std::clamp(bonkSfxVolume, 0.0f, 1.0f));
     }
 }

@@ -62,9 +62,14 @@ namespace AICombat
         }
     }
 
-    void HammerHeal::Update(float)
+    void HammerHeal::Update(float _dt)
     {
+        totalTime += _dt;
         CheckSensorEnter();
+        if(PointLight *point = &(entity.GetComponent<PointLight>()))
+            point->intensity = (sin(totalTime) * 0.5f + minIntensity) * maxIntensity;
+        if(totalTime > 15.0f)
+            totalTime = 0.0f;
     }
 
     void HammerHeal::CheckSensorEnter()
