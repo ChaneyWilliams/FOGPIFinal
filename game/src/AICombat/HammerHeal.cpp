@@ -65,11 +65,16 @@ namespace AICombat
     void HammerHeal::Update(float _dt)
     {
         totalTime += _dt;
+
         CheckSensorEnter();
-        if(PointLight *point = &(entity.GetComponent<PointLight>()))
+
+        if (PointLight *point = &(entity.GetComponent<PointLight>()))
             point->intensity = (sin(totalTime) * 0.5f + minIntensity) * maxIntensity;
-        if(totalTime > 15.0f)
+
+        if (totalTime > 15.0f)
             totalTime = 0.0f;
+
+        HealOverTime(_dt);
     }
 
     void HammerHeal::CheckSensorEnter()
@@ -107,6 +112,28 @@ namespace AICombat
             PlayHealsSfx();
             targetStateMachine->TakeDamage(-damage);
             m_hitTargetsThisSwing.push_back(other);
+        }
+    }
+
+    void HammerHeal::HealOverTime(float _dt)
+    {
+        HealerStateMachine *ownerStateMachine = GetOwnerStateMachine();
+        if (ownerStateMachine == nullptr || !ownerStateMachine->IsAlive())
+            return;
+
+        for (Canis::Entity *other : entity.GetComponent<Canis::BoxCollider>().entered)
+        {
+            if (other == nullptr || !other->active || other == owner)
+                continue;
+
+            if (other->tag != targetTag)
+                continue;
+
+            AICombat::ICombatant *target = other->GetScript<AICombat::ICombatant>();
+            if (target == nullptr || !target->IsAlive())
+                continue;
+            PlayHealsSfx();
+            target->TakeDamage(-2.0f * _dt);
         }
     }
 

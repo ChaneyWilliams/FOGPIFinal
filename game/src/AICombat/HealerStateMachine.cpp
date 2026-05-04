@@ -222,13 +222,7 @@ namespace AICombat
             int maxHealth = -1;
             bool isAlive = false;
 
-            if (HealerStateMachine *h = candidate->GetScript<HealerStateMachine>())
-            {
-                health = h->GetCurrentHealth();
-                maxHealth = h->maxHealth;
-                isAlive = h->IsAlive();
-            }
-            else if (BrawlerStateMachine *b = candidate->GetScript<BrawlerStateMachine>())
+            if (BrawlerStateMachine *b = candidate->GetScript<BrawlerStateMachine>())
             {
                 health = b->GetCurrentHealth();
                 maxHealth = b->maxHealth;
