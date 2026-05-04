@@ -23,6 +23,7 @@ namespace AICombat
         float totalTime = 0.0f;
         float minIntensity = 1.0f;
         float maxIntensity = 8.0f;
+        float healTimer = 0.0f;
 
         explicit HammerHeal(Canis::Entity& _entity) : Canis::ScriptableEntity(_entity) {}
 

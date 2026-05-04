@@ -47,9 +47,8 @@ Entities:
       ModelAsset:
         uuid: 17154083321347000101
     AICombat::BulletDamage:
-      owner: 0
       sensorSize: [1, 1, 1]
-      damage: 10
+      damage: 20
       targetTag: Red
     SuperPupUtilities::Bullet:
       damage: 1

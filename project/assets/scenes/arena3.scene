@@ -573,7 +573,7 @@ Entities:
       attackRange: 10
       laserPrefab: 16543449644754534652
       poolCode: red_bullet
-      fireInterval: 1.75
+      fireInterval: 0.5
       turnSpeedDegrees: 120
       fireAngleThresholdDegrees: 8
       muzzleOffset: [0, 0, 0]

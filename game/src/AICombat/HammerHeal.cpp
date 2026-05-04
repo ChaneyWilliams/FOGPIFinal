@@ -121,6 +121,13 @@ namespace AICombat
         if (ownerStateMachine == nullptr || !ownerStateMachine->IsAlive())
             return;
 
+        healTimer += _dt;
+
+        if (healTimer < 1.0f)
+            return;
+
+        healTimer -= 1.0f;
+
         for (Canis::Entity *other : entity.GetComponent<Canis::BoxCollider>().entered)
         {
             if (other == nullptr || !other->active || other == owner)
@@ -132,8 +139,9 @@ namespace AICombat
             AICombat::ICombatant *target = other->GetScript<AICombat::ICombatant>();
             if (target == nullptr || !target->IsAlive())
                 continue;
+
             PlayHealsSfx();
-            target->TakeDamage(-2.0f * _dt);
+            target->TakeDamage(-2); // EXACT 2 HP per second
         }
     }
 

@@ -56,15 +56,21 @@ namespace AICombat
             return;
         }
 
-        brawlerStatMachine->FaceTarget(*target);
 
-        if (brawlerStatMachine->DistanceTo(*target) <= brawlerStatMachine->GetAttackRange())
+        float distance = brawlerStatMachine->DistanceTo(*target);
+        float desiredDistance = brawlerStatMachine->GetAttackRange() - 2.0f;
+
+        if (distance <= brawlerStatMachine->GetAttackRange())
         {
             brawlerStatMachine->ChangeState(HealerHammerTimeState::Name);
             return;
         }
 
-        brawlerStatMachine->MoveTowards(*target, moveSpeed, _dt);
+        if (distance > desiredDistance)
+        {
+            brawlerStatMachine->MoveTowards(*target, moveSpeed, _dt);
+        }
+        brawlerStatMachine->FaceTarget(*target);
     }
 
     HealerHammerTimeState::HealerHammerTimeState(SuperPupUtilities::StateMachine &_stateMachine) : State(Name, _stateMachine) {}
@@ -353,9 +359,7 @@ namespace AICombat
         Canis::Transform &hammerTransform = hammerVisual->GetComponent<Canis::Transform>();
         const float normalized = Clamp01(_normalized);
 
-
         const float angle = normalized * 2.0f * PI;
-
 
         const float swing = sinf(angle);
 
